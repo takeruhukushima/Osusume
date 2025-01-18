@@ -33,20 +33,25 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 
+// 表示モードの型
 type ViewMode = 'card' | 'tree' | 'graph';
+
+// メディア種別
 type MediaType = 'book' | 'movie' | 'drama' | 'manga' | 'anime' | 'music' | 'zeitgeist';
 
+// メディアアイテムの型定義
 interface MediaItem {
   id: string;
   type: MediaType;
   title: string;
   creator: string;
   year: string;
-  importance: number;  // 使っていないが型定義として残しておく
+  importance: number;  // 今回は使わないが、型定義として残しておく
   notes: string;       // Markdown本文
   imageUrl: string;
 }
 
+// メディア種別ごとのアイコン
 const mediaTypeIcons: Record<MediaType, React.FC<React.SVGProps<SVGSVGElement>>> = {
   book: BookOpen,
   movie: Film,
@@ -57,6 +62,7 @@ const mediaTypeIcons: Record<MediaType, React.FC<React.SVGProps<SVGSVGElement>>>
   zeitgeist: Globe,
 };
 
+// メディア種別ラベル
 const mediaTypeLabels: Record<MediaType, string> = {
   book: '本',
   movie: '映画',
@@ -74,8 +80,8 @@ const markdownFiles = import.meta.glob('./contents/**/*.md', {
 });
 
 /* --------------------------------
-   一覧表示: カード (星を削除)
-   + 改行を活かしつつ2行に抑える
+   一覧表示: カード
+   星を削除し、改行を活かして2行制限
 -------------------------------- */
 function MediaItemCard({
   item,
@@ -111,7 +117,7 @@ function MediaItemCard({
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-xs text-amber-700">{item.year}年</span>
         </div>
-        {/* 改行を認識し、2行までに制限 */}
+        {/* 改行を活かして2行までに制限 */}
         <p className="text-xs text-gray-600 line-clamp-2 whitespace-pre-wrap break-words">
           {item.notes}
         </p>
@@ -160,7 +166,7 @@ function CreatorSection({
 }
 
 /* -----------------------------
-   詳細表示: ページ
+   詳細表示ページ
 ----------------------------- */
 function DetailPage({
   item,
@@ -192,7 +198,7 @@ function DetailPage({
    ツリー表示: TreeView
 ----------------------------- */
 function TreeView({ items, onSelect }: { items: MediaItem[], onSelect: (item: MediaItem) => void }) {
-  // 1) カテゴリ別 → 2) 作者別 → 3) アイテム
+  // type -> creator -> items
   const groupedByType = useMemo(() => {
     const map: Record<string, MediaItem[]> = {};
     for (const it of items) {
@@ -208,7 +214,7 @@ function TreeView({ items, onSelect }: { items: MediaItem[], onSelect: (item: Me
       <h2 className="text-lg font-bold mb-4 text-amber-950">ツリー表示</h2>
       <ul className="list-disc list-inside space-y-4">
         {Object.entries(groupedByType).map(([typeKey, typeItems]) => {
-          // さらに作者でグループ
+          // creator -> items
           const groupedByCreator = typeItems.reduce<Record<string, MediaItem[]>>((acc, curr) => {
             if (!acc[curr.creator]) {
               acc[curr.creator] = [];
@@ -252,7 +258,7 @@ function TreeView({ items, onSelect }: { items: MediaItem[], onSelect: (item: Me
 
 /* -----------------------------
    グラフ表示: GraphView
-   -> すべての .md (MediaItem) をノード化
+   -> すべての .md (MediaItem) をノードに
 ----------------------------- */
 function GraphView({ items, onSelect }: { items: MediaItem[], onSelect: (item: MediaItem) => void }) {
 
@@ -310,15 +316,16 @@ function App() {
   const [items, setItems] = useState<MediaItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null);
 
-  // Markdown読み込み
+  // Markdown 読み込み
   useEffect(() => {
     const loadMarkdownFiles = async () => {
       const loadedItems: MediaItem[] = [];
       const filePaths = Object.keys(markdownFiles);
 
       for (const filePath of filePaths) {
+        // `rawContent` が unknown 型の場合、String(...) で文字列化
         const rawContent = await markdownFiles[filePath]();
-        const parsed = fm(String(rawContent));
+        const parsed = fm(String(rawContent)); 
         const data: any = parsed.attributes;
         const body = parsed.body;
 
@@ -333,7 +340,7 @@ function App() {
           title: data.title,
           creator: data.creator,
           year: data.year || "",
-          importance: data.importance || 3, // 使わないが保持
+          importance: data.importance || 3,
           imageUrl: data.imageUrl || "",
           notes: body || "",
         });
@@ -350,7 +357,7 @@ function App() {
     ? items
     : items.filter(item => item.type === selectedType);
 
-  // 作者ごとに分類 + ソート (カード一覧で使用)
+  // 作者ごとにグルーピング & ソート (カード表示で使用)
   const groupedByCreator = useMemo(() => {
     const groups: Record<string, MediaItem[]> = {};
     filteredItems.forEach(item => {
@@ -399,7 +406,7 @@ function App() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* タブで viewMode を切り替え (card/tree/graph) */}
+            {/* タブ: card/tree/graph */}
             <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
               <TabsList className="bg-white/50">
                 <TabsTrigger value="card" className="data-[state=active]:bg-amber-50">
