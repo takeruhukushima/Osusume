@@ -318,7 +318,7 @@ function App() {
 
       for (const filePath of filePaths) {
         const rawContent = await markdownFiles[filePath]();
-        const parsed = fm(rawContent);
+        const parsed = fm(String(rawContent));
         const data: any = parsed.attributes;
         const body = parsed.body;
 
