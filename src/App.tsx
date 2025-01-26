@@ -115,7 +115,7 @@ function MediaItemCard({
       </div>
       <div className="p-3 bg-white">
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-xs text-amber-700">{item.year}年</span>
+          <span className="text-xs text-amber-700">created at {item.year}</span>
         </div>
         {/* 改行を活かして2行までに制限 */}
         <p className="text-xs text-gray-600 line-clamp-2 whitespace-pre-wrap break-words">
