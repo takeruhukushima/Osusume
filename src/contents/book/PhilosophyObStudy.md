@@ -3,7 +3,7 @@ type: book
 title: 勉強の哲学
 creator: 千葉雅也
 year: 2018/1/26
-importance: 
+importance:
 imageUrl: https://m.media-amazon.com/images/I/71PUkouQZ5L._AC_UL480_FMwebp_QL65_.jpg
 tags: memento
 relatedContent:
